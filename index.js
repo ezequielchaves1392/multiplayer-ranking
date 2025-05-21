@@ -4,11 +4,12 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
 const admin = require('firebase-admin');
-const serviceAccount = require('./multiplayer-ranking-firebase-adminsdk-fbsvc-0c07690a08.json'); // tu archivo descargado
+
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://TU_PROYECTO.firebaseio.com" // pon la URL de tu Firebase Realtime DB
+  databaseURL: "https://multiplayer-ranking-default-rtdb.firebaseio.com/"
 });
 
 const db = admin.database();
