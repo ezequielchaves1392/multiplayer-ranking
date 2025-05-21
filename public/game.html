@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multiplayer Ranking - Game</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #34495e;
+    }
+    h1 {
+      margin-bottom: 0.5rem;
+      user-select: none;
+    }
+    #welcome {
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      user-select: none;
+    }
+    #clickBtn {
+      font-size: 2rem;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      border: none;
+      background-color: #2980b9;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(41, 128, 185, 0.7);
+      user-select: none;
+      margin-bottom: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    #clickBtn:hover {
+      background-color: #1abc9c;
+    }
+    #clicks {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      user-select: none;
+    }
+    #ranking {
+      width: 320px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+      padding: 1rem;
+      user-select: none;
+    }
+    #ranking h2 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    #rankingList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    #rankingList li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #ddd;
+      font-weight: 600;
+    }
+    #logoutBtn {
+      margin-top: 2rem;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-weight: 700;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #logoutBtn:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <h1>¡Bienvenido al Juego!</h1>
+  <div id="welcome"></div>
+  <button id="clickBtn">Click me!</button>
+  <div id="clicks">Clicks: 0</div>
+
+  <div id="ranking">
+    <h2>Ranking Global</h2>
+    <ul id="rankingList"></ul>
+  </div>
+
+  <button id="logoutBtn">Cerrar sesión</button>
+
+  <script>
+    const socket = io();
+
+    const welcomeDiv = document.getElementById('welcome');
+    const clickBtn = document.getElementById('clickBtn');
+    const clicksDiv = document.getElementById('clicks');
+    const rankingList = document.getElementById('rankingList');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Obtener username guardado en localStorage
+    const username = localStorage.getItem('username');
+
+    if (!username) {
+      // Si no hay usuario, redirigir a login
+      window.location.href = 'login.html';
+    } else {
+      welcomeDiv.textContent = `Hola, ${username}!`;
+    }
+
+    // Solicitar clicks del usuario
+    socket.emit('getUserClicks', username);
+
+    // Mostrar clicks actuales
+    socket.on('userClicks', (count) => {
+      clicksDiv.textContent = `Clicks: ${count}`;
+    });
+
+    // Al hacer click
+    clickBtn.addEventListener('click', () => {
+      socket.emit('incrementClick', username);
+    });
+
+    // Actualizar clicks luego de incrementar
+    socket.on('clickUpdated', (newCount) => {
+      clicksDiv.textContent = `Clicks: ${newCount}`;
+    });
+
+    // Pedir ranking al cargar página
+    socket.emit('getRanking');
+
+    // Actualizar ranking recibido
+    socket.on('updateRanking', (ranking) => {
+      rankingList.innerHTML = '';
+      ranking.forEach(({ username: user, clicks }) => {
+        const li = document.createElement('li');
+        li.textContent = `${user}`;
+        const span = document.createElement('span');
+        span.textContent = clicks;
+        li.appendChild(span);
+        rankingList.appendChild(li);
+      });
+    });
+
+    // Botón cerrar sesión
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('username');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>
