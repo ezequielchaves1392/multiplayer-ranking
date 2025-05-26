@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
@@ -8,12 +9,16 @@ const PORT = process.env.PORT || 3000;
 // Usuarios en memoria (sin persistencia)
 let users = {};
 
-// Servir archivos estáticos de la carpeta 'public'
-app.use(express.static('public'));
+// Servir archivos estáticos en public
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Servir el index.html de public cuando se accede a la raíz
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Socket.IO
 io.on('connection', (socket) => {
-  // Registro
   socket.on('register', ({ username, password }, callback) => {
     if (!username || !password) {
       return callback({ success: false, message: 'Usuario y contraseña son obligatorios.' });
@@ -26,7 +31,6 @@ io.on('connection', (socket) => {
     io.emit('updateRanking', getRankingArray());
   });
 
-  // Login
   socket.on('login', ({ username, password }, callback) => {
     if (!users[username] || users[username].password !== password) {
       return callback({ success: false, message: 'Usuario o contraseña incorrectos.' });
@@ -34,18 +38,15 @@ io.on('connection', (socket) => {
     callback({ success: true });
   });
 
-  // Obtener clicks usuario
   socket.on('getUserClicks', (username) => {
     const clicks = users[username]?.clicks || 0;
     socket.emit('userClicks', clicks);
   });
 
-  // Obtener ranking completo solo para el que pidió
   socket.on('getRanking', () => {
     socket.emit('updateRanking', getRankingArray());
   });
 
-  // Incrementar clicks usuario
   socket.on('incrementClick', (username) => {
     if (users[username]) {
       users[username].clicks++;
