@@ -119,7 +119,7 @@
 
     if (!username) {
       // Si no hay usuario, redirigir a login
-      window.location.href = 'login.html';
+      window.location.href = '/login.html';
     } else {
       welcomeDiv.textContent = `Hola, ${username}!`;
     }
@@ -161,7 +161,7 @@
     // Botón cerrar sesión
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('username');
-      window.location.href = 'login.html';
+      window.location.href = '/login.html';
     });
   </script>
 </body>
