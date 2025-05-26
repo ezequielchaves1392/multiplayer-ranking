@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 let users = {};
 
 // Servir archivos estáticos
-app.use(express.static('public'));
+app.use(express.static('public/intro'));
 
 // Socket.IO
 io.on('connection', (socket) => {
