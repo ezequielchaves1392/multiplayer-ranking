@@ -118,8 +118,8 @@
     const username = localStorage.getItem('username');
 
     if (!username) {
-      // Si no hay usuario, redirigir a login
-      window.location.href = '/login.html';
+      // Si no hay usuario, redirigir a home
+      window.location.href = '/home/index.html';
     } else {
       welcomeDiv.textContent = `Hola, ${username}!`;
     }
@@ -161,7 +161,7 @@
     // Botón cerrar sesión
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('username');
-      window.location.href = '/login.html';
+      window.location.href = '/home/index.html';
     });
   </script>
 </body>
