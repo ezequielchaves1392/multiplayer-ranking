@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wizzcat-Clicker</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="home.css" />
+</head>
+<body>
+  <main>
+    <section class="home-options" role="main">
+      <div class="logo-container">
+        <img src="../intro/logo.png" alt="Wizzcat Studios logo" class="logo-img" style="width: 120px; margin-bottom: 1rem;" />
+      </div>
+      <h1>Bienvenido</h1>
+      <div class="buttons-wrapper">
+        <button onclick="location.href='../login/login.html'">Iniciar Sesión</button>
+        <button onclick="location.href='../register/register.html'">Registrarse</button>
+      </div>
+    </section>
+
+    <aside aria-label="Ranking Global">
+      <h3>Ranking Global</h3>
+      <table id="rankingTable" aria-live="polite" aria-atomic="true">
+        <thead>
+          <tr><th>#</th><th>Usuario</th><th>Clicks</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </aside>
+  </main>
+
+  <script>
+    const socket = io();
+    const rankingTableBody = document.querySelector('#rankingTable tbody');
+
+    socket.on('updateRanking', ranking => {
+      rankingTableBody.innerHTML = '';
+      ranking.forEach((user, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${index + 1}</td><td>${user.username}</td><td>${user.clicks}</td>`;
+        rankingTableBody.appendChild(tr);
+      });
+    });
+
+    socket.emit('getRanking');
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Hacer que la sesión sea única y que caduque si no se usa por un tiempo 
+Mostrar los que estén online con un ciculito verde
+Agregar una musiquita al intro
+Cambiar un poco el aspecto y hacerlo responsive 
+como hago que estos archivos no se puedan ver en el navegador?
