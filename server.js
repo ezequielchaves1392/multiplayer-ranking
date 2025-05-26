@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
@@ -8,24 +9,16 @@ const PORT = process.env.PORT || 3000;
 // Usuarios en memoria (sin persistencia)
 let users = {};
 
-// Middleware para debug de rutas (opcional, borralo si querés)
-app.use((req, res, next) => {
-  console.log(`Petición recibida: ${req.method} ${req.url}`);
-  next();
+// Servir archivos estáticos en public
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Servir el index.html de public cuando se accede a la raíz
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Servir carpeta /intro en la raíz "/"
-app.use('/', express.static('public/intro'));
-
-// Servir carpeta /login en "/login"
-app.use('/login', express.static('public/login'));
-
-// Servir carpeta /game en "/game"
-app.use('/game', express.static('public/game'));
 
 // Socket.IO
 io.on('connection', (socket) => {
-  // Registro
   socket.on('register', ({ username, password }, callback) => {
     if (!username || !password) {
       return callback({ success: false, message: 'Usuario y contraseña son obligatorios.' });
@@ -38,7 +31,6 @@ io.on('connection', (socket) => {
     io.emit('updateRanking', getRankingArray());
   });
 
-  // Login
   socket.on('login', ({ username, password }, callback) => {
     if (!users[username] || users[username].password !== password) {
       return callback({ success: false, message: 'Usuario o contraseña incorrectos.' });
@@ -46,18 +38,15 @@ io.on('connection', (socket) => {
     callback({ success: true });
   });
 
-  // Obtener clicks usuario
   socket.on('getUserClicks', (username) => {
     const clicks = users[username]?.clicks || 0;
     socket.emit('userClicks', clicks);
   });
 
-  // Obtener ranking completo (solo para quien pidió)
   socket.on('getRanking', () => {
     socket.emit('updateRanking', getRankingArray());
   });
 
-  // Incrementar clicks usuario
   socket.on('incrementClick', (username) => {
     if (users[username]) {
       users[username].clicks++;
